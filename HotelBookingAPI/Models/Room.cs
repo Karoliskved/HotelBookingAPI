@@ -6,7 +6,9 @@ namespace hotelBooking.Models
     [BsonIgnoreExtraElements]
     public class Room
     {
-        public ObjectId Id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; }
         [BsonElement("roomNumber")]
         public decimal RoomNumber { get; set; }
         //public string hotelName { get; set; }
