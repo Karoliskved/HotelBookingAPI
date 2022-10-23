@@ -1,9 +1,22 @@
-﻿namespace hotelBooking.Models
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+using System.Text.Json.Serialization;
+
+namespace hotelBooking.Models
 {
     public class User
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string ID { get; set; }
+        [BsonElement("username")]
+        [JsonPropertyName("username")]
+        public string? Username { get; set; }
+        [BsonElement("password")]
+        [JsonPropertyName("password")]
+        public string? Password { get; set; }
+        [BsonElement("bookedRooms")]
+        [JsonPropertyName("bookedRooms")]
+        public List<Room>? BookedRooms { get; set; }
     }
 }

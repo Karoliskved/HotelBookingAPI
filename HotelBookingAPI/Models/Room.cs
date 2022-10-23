@@ -1,24 +1,37 @@
-﻿using MongoDB.Bson;
+﻿using HotelBookingAPI.Models;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Text.Json.Serialization;
 
 namespace hotelBooking.Models
 {
-    [BsonIgnoreExtraElements]
     public class Room
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? Id { get; set; }
+        public string? ID { get; set; }
+        [BsonElement("hotel")]
+        [JsonPropertyName("hotel")]
+        public Hotel? Hotel { get; set; }
         [BsonElement("roomNumber")]
+        [JsonPropertyName("roomNumber")]
         public decimal RoomNumber { get; set; }
-        //public string hotelName { get; set; }
-        //public decimal capacity { get; set; }
-        //public Address address { get; set; }
-        //public decimal price { get; set; }
-        //public string description { get; set; }
-        //public string imageUrlLink { get; set; }
-        //public string contactInfo { get; set; }
-        //public bool status { get; set; }
+        [BsonElement("capacity")]
+        [JsonPropertyName("capacity")]
+        public decimal Capacity { get; set; }
+        [BsonElement("price")]
+        [JsonPropertyName("price")]
+        public decimal Price { get; set; }
+        [BsonElement("description")]
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
+        [BsonElement("imageUrlLink")]
+        [JsonPropertyName("imgUrlLink")]
+        public string? ImageUrlLink { get; set; }
+
+        [BsonElement("booked")]
+        [JsonPropertyName("booked")]
+        public bool Booked { get; set; }
     }
 
 }

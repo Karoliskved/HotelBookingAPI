@@ -1,10 +1,21 @@
-﻿namespace hotelBooking.Models
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System.Text.Json.Serialization;
+
+namespace hotelBooking.Models
 {
     public class Address
     {
-        public string City { get; set; }
-        public string Country { get; set; }
-        public string Street { get; set; }
-        public string HouseNumber { get; set; }
+        [BsonElement("city")]
+        [JsonPropertyName("city")]
+        public string? City { get; set; }
+        [BsonElement("country")]
+        [JsonPropertyName("country")]
+        public string? Country { get; set; }
+        [BsonElement("street")]
+        [JsonPropertyName("street")]
+        public string? Street { get; set; }
+        [BsonElement("houseNumber")]
+        [JsonPropertyName("houseNumber")]
+        public string? HouseNumber { get; set; }
     }
 }
