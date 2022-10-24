@@ -1,4 +1,5 @@
 ﻿using hotelBooking.Models;
+using HotelBookingAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,20 +15,18 @@ namespace HotelBookingAPI.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private IMongoCollection<User> _userCollection;
-        private IMongoCollection<Room> _roomCollection;
-        private IHttpContextAccessor _context;
-
-        public UserController(IMongoClient client, IHttpContextAccessor httpContextAccessor)
+        private readonly IHttpContextAccessor _context;
+        private readonly UserService _userService;
+        private readonly RoomService _roomService;
+        public UserController(UserService userService, RoomService roomService, IHttpContextAccessor httpContextAccessor)
         {
-            var database = client.GetDatabase("HotelRoomsDB");
-            _userCollection = database.GetCollection<User>("Users");
-            _roomCollection = database.GetCollection<Room>("Room");
+            _userService = userService;
+            _roomService = roomService;
             _context = httpContextAccessor;
         }
-        // sita route tik adminam reiks padaryt [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ("Administrator")]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ("Administrator")]
         [HttpGet]
-        public async Task<IEnumerable<User>> GetUsers() =>  await _userCollection.Find(_ => true).ToListAsync();
+        public async Task<List<User>> GetUsers() =>  await _userService.GetAllUsers();
        
         [HttpGet("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -41,16 +40,16 @@ namespace HotelBookingAPI.Controllers
                 {
                     return Unauthorized();
                 }
-                var user = await _userCollection.Find(user => user.ID == id).FirstOrDefaultAsync();
+                var user = await _userService.GetUserByID(id);
+                if(user is null)
+                {
+                    return NotFound($"User with id: {id} doesn't exist.");
+                }
                 if (user.Username != username)
                 {
                     return Unauthorized();
                 }
-                if (user != null)
-                {
-                    return Ok(user);
-                }
-                return NotFound($"User with id: {id} doesn't exist.");
+                return Ok(user);
             }
             return BadRequest($"Invalid id: {id} provided.");
         }
@@ -65,27 +64,27 @@ namespace HotelBookingAPI.Controllers
                 {
                     return Unauthorized();
                 }
-                var result = await _userCollection.Find(user => user.ID == id).FirstOrDefaultAsync();
+                var result = await _userService.GetUserByID(user.ID);
+                if (result is null)
+                {
+                    return NotFound("User doesn't exist.");
+                }
                 if (result.Username != username)
                 {
                     return Unauthorized();
                 }
-                var room = await _roomCollection.Find(id).FirstOrDefaultAsync();
-            if(room != null)
-            {
-                FilterDefinition<Room> filter2 = Builders<Room>.Filter.Eq("ID", id);
-                UpdateDefinition<Room> update2 = Builders<Room>.Update.Set("Booked", true);
-                await _roomCollection.UpdateOneAsync(filter2, update2);
-                room = await _roomCollection.Find(id).FirstOrDefaultAsync();
-                FilterDefinition<User> filter = Builders<User>.Filter.Eq("ID", user.ID);
-                UpdateDefinition<User> update = Builders<User>.Update.AddToSet("BookedRooms", room);
-                await _userCollection.UpdateOneAsync(filter, update);
-                return CreatedAtAction(nameof(BookHotelRoomByID), new { id = user.ID }, user);
-            }
-            return NotFound($"Room with id: {id} doesn't exist.");
+                var room = await _roomService.GetRoomById(user.ID);
+                if(room is null)
+                {
+                    return NotFound($"Room with id: {id} doesn't exist.");
+                }
+                    await _roomService.BookRoom(id);
+                    room = await _roomService.GetRoomById(id);
+                    await _userService.AddRoomToUser(user, room);
+                    return NoContent();
                
-            }
-            return BadRequest($"Invalid id: {id} provided.");
+                }
+                return BadRequest($"Invalid id provided.");
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut("{id}")]
@@ -98,17 +97,16 @@ namespace HotelBookingAPI.Controllers
                 {
                     return Unauthorized();
                 }
-                var result = await _userCollection.Find(user => user.ID == id).FirstOrDefaultAsync();
+                var result = await _userService.GetUserByID(id);
+                if (result is null)
+                {
+                    return NotFound("User doesn't exist.");
+                }
                 if (result.Username != username)
                 {
                     return Unauthorized();
                 }
-                var room = await _userCollection.Find(user => user.ID == id).FirstOrDefaultAsync();
-                if (user is null)
-                {
-                    return NotFound();
-                }
-                await _userCollection.ReplaceOneAsync(user => user.ID == id, user);
+                await _userService.UpdateUser(user);
                 return NoContent();
             }
             return BadRequest($"Invalid id: {id} provided.");
@@ -124,12 +122,16 @@ namespace HotelBookingAPI.Controllers
                 {
                     return Unauthorized();
                 }
-                var user = await _userCollection.Find(user => user.ID == id).FirstOrDefaultAsync();
+                var user = await _userService.GetUserByID(id);
+                if(user is null)
+                {
+                    return NotFound("User doesn't exist.");
+                }
                 if (user.Username != username)
                 {
                     return Unauthorized();
                 }
-                await _userCollection.DeleteOneAsync(user => user.ID == id);
+                await _userService.DeleteUser(id);
                 return NoContent();
             }
             return BadRequest($"Invalid id: {id} provided.");

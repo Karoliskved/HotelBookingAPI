@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using HotelBookingAPI.Interfaces;
+using HotelBookingAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,8 @@ builder.Services.AddSingleton<IMongoClient, MongoClient>(s =>
 {
     return new MongoClient("mongodb://127.0.0.1:27017");
 });
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<RoomService>();
 
 builder.Services.AddSwaggerGen(options =>
 {

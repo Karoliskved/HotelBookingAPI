@@ -1,4 +1,6 @@
 ﻿using hotelBooking.Models;
+using HotelBookingAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -11,33 +13,31 @@ namespace HotelBookingAPI.Controllers
     [ApiController]
     public class RoomController : ControllerBase
     {
-        private IMongoCollection<Room> _roomCollection;
-
-        public RoomController(IMongoClient client)
+        
+        public readonly RoomService _roomService;
+        public RoomController(RoomService roomService)
         {
-            var database = client.GetDatabase("HotelRoomsDB");
-            _roomCollection = database.GetCollection<Room>("Rooms");
+            _roomService = roomService;
         }
         [HttpGet]
-        public IActionResult GetAllRooms()
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllRooms()
         {
-            var rooms = _roomCollection.Find(_ => true).ToList();
-            if (rooms != null)
+            var rooms = await _roomService.GetAllRooms();
+            if (rooms is not null)
             {
                 return Ok(rooms);
             }
             return NotFound("There are no rooms in the database.");
         }
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Room))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [AllowAnonymous]
         public async Task<IActionResult> GetRoomById(string id)
         {
             if (ObjectId.TryParse(id, out _))
             {
-            var room = await _roomCollection.Find(room => room.ID == id).FirstOrDefaultAsync();
-            if(room != null)
+            var room = await _roomService.GetRoomById(id);
+            if(room is not null)
             {
                 return Ok(room);
             }
@@ -47,28 +47,31 @@ namespace HotelBookingAPI.Controllers
         }
 
         [HttpPost("/add")]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ("Administrator")]
         public async Task<IActionResult> AddRoom([FromBody] Room room)
         {
-            await _roomCollection.InsertOneAsync(room);
+            await _roomService.AddRoom(room);
             return CreatedAtAction(nameof(AddRoom), new { id = room.ID }, room);
         }
 
         [HttpPut("{id:length(24)}")]
-        public async Task<IActionResult> UpdateRoom(string id, [FromBody] Room newRoom)
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ("Administrator")]
+        public async Task<IActionResult> UpdateRoomByID(string id, [FromBody] Room newRoom)
         {
-            var room = await _roomCollection.Find(room => room.ID == id).FirstOrDefaultAsync();
+            var room = await _roomService.GetRoomById(id);
             if (room is null)
             {
-                return NotFound();
+                return NotFound($"Room with id: {id} doesn't exist.");
             }
-            await _roomCollection.ReplaceOneAsync(room => room.ID == id, newRoom);
+            await _roomService.UpdateRoomByID(id, room);
             return NoContent();
         }
 
         [HttpDelete("{id:length(24)}")]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ("Administrator")]
         public async Task<IActionResult> DeleteRoom(string id)
         {
-            await _roomCollection.DeleteOneAsync(room => room.ID == id);
+            await _roomService.DeleteRoomByID(id);
             return NoContent();
         }
     }

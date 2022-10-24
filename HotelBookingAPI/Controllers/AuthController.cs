@@ -1,11 +1,8 @@
 ﻿using hotelBooking.Models;
 using HotelBookingAPI.Models;
+using HotelBookingAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using MongoDB.Driver;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace HotelBookingAPI.Controllers
 {
@@ -13,77 +10,35 @@ namespace HotelBookingAPI.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
-        private IMongoCollection<User> _userCollection;
+        private readonly UserService _userService;
 
-        public AuthController(IConfiguration configuration, IMongoClient client)
+        public AuthController(UserService userService)
         {
-            var database = client.GetDatabase("HotelRoomsDB");
-            _userCollection = database.GetCollection<User>("Users");
-            _configuration = configuration;
+            _userService = userService;
         }
 
         [AllowAnonymous]
         [HttpPost("/register")]
         public async Task<ActionResult<User>> Register([FromBody] UserLogin user)
         {
-            var result = await _userCollection.Find(u => u.Username == user.Username).FirstOrDefaultAsync();
-            if (result is null)
+            var newUser = await _userService.Register(user);
+            if (newUser is null)
             {
-                User newUser = new()
-                {
-                    Username = user.Username,
-                    Password = user.Password
-                };
-                await _userCollection.InsertOneAsync(newUser);
-                return CreatedAtAction(nameof(Register), new { id = newUser.ID }, newUser);
+                return BadRequest("User already exists.");
             }
-            return BadRequest("User already exists.");
+            return CreatedAtAction(nameof(Register), new { id = newUser.ID }, newUser);
         }
         [AllowAnonymous]
         [HttpPost("/login")]
-        public async Task<IActionResult> Login([FromBody] UserLogin user)
+        public async Task<ActionResult<string>> Login([FromBody] UserLogin user)
         {
-            var result = await _userCollection.Find(u => u.Username == user.Username).FirstOrDefaultAsync();
+            var result = await _userService.Login(user);
             if (result is null)
             {
-                return BadRequest("User doesn't exist.");
+                return BadRequest("Wrong username or password.");
             }
-            if (result.Password == user.Password)
-            {
-                User newUser = new()
-                {
-                    Username = user.Username,
-                    Password = user.Password
-                };
-                string token = CreateToken(newUser);
-                return Ok(token);
-            }
-            return BadRequest("Wrong password.");
+            return result;
 
-        }
-        private string CreateToken(User user)
-        {
-            List<Claim> claims = new()
-            {
-                new Claim(ClaimTypes.Name, user.Username)
-            };
-
-            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
-                _configuration.GetSection("JwtTokenInfo:SecretKey").Value));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JwtTokenInfo:Issuer"],
-                audience: _configuration["JwtTokenInfo:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(15),
-                signingCredentials: creds);
-
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-
-            return jwt;
         }
     }
 }
