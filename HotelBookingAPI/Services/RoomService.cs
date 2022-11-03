@@ -57,7 +57,7 @@ namespace HotelBookingAPI.Services
             {
                 return null;
             }
-            int days = bookingInfo.ToDate.Date.Subtract(bookingInfo.FromDate).Days;
+            int days = bookingInfo.ToDate.Date.Subtract(bookingInfo.FromDate.Date).Days;
             foreach (var bookedDate in room.BookedDates)
             {
                 if (bookingInfo.FromDate.Date >= bookedDate.FromDate.Date && bookingInfo.FromDate.Date <= bookedDate.ToDate.Date)
@@ -70,23 +70,26 @@ namespace HotelBookingAPI.Services
                 }
             }
             decimal price = 0;
+            var tempDate = bookingInfo.FromDate.Date;
             foreach (var priceRange in room.PriceRanges)
             {
-                if (bookingInfo.FromDate.Date >= priceRange.FromDate.Date && bookingInfo.FromDate.Date <= priceRange.ToDate.Date)
+                if (tempDate >= priceRange.FromDate.Date && tempDate <= priceRange.ToDate.Date)
                 {
-                    int count = 0;
-                    var startDate = priceRange.FromDate.Date;
-                    while (startDate != priceRange.ToDate.Date && days != 0)
-                    {
-                        count++;
-                        startDate.AddDays(1);
-                        days--;
-                    }
-                    price += count * priceRange.Price;
+                    int count = priceRange.ToDate.Date.Subtract(priceRange.FromDate.Date).Days;
                     if (days == 0)
                     {
                         break;
                     }
+                    if (count >= days)
+                    {
+                        price += days * priceRange.Price;
+                        days -= days;
+                        tempDate.AddDays(days);
+                        continue;
+                    }
+                    price += count * priceRange.Price;
+                    days -= count;
+                    tempDate.AddDays(count);
                 }
             }
             if (days != 0)
@@ -95,6 +98,8 @@ namespace HotelBookingAPI.Services
             }
             BookedRoomInfo bookedRoomInfo = new()
             {
+                UserID = bookingInfo.UserID,
+                RoomID = bookingInfo.RoomID,
                 Price = price,
                 FromDate = bookingInfo.FromDate,
                 ToDate = bookingInfo.ToDate
@@ -104,8 +109,8 @@ namespace HotelBookingAPI.Services
             await _roomCollection.UpdateOneAsync(filter, update);
             return bookedRoomInfo;
         }
-    public async Task<string?> AddPriceInterval(string id, RoomPriceRange roomPriceRange)
-    {
+        public async Task<string?> AddPriceInterval(string id, RoomPriceRange roomPriceRange)
+        {
             FilterDefinition<Room> filter = Builders<Room>.Filter.Eq("ID", id);
             UpdateDefinition<Room> update = Builders<Room>.Update.AddToSet("priceRanges", roomPriceRange);
             await _roomCollection.UpdateOneAsync(filter, update);

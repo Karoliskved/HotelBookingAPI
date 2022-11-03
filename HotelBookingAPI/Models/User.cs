@@ -18,6 +18,6 @@ namespace hotelBooking.Models
         public string? Password { get; set; }
         [BsonElement("bookedRooms")]
         [JsonPropertyName("bookedRooms")]
-        public List<BookedRoomInfo>? BookedRooms { get; set; }
+        public List<BookedRoomInfo> BookedRooms { get; set; } = new List<BookedRoomInfo>();
     }
 }
