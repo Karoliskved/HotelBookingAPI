@@ -1,4 +1,5 @@
 ﻿using hotelBooking.Models;
+using HotelBookingAPI.Models;
 using HotelBookingAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -53,17 +54,27 @@ namespace HotelBookingAPI.Controllers
             await _roomService.AddRoom(room);
             return CreatedAtAction(nameof(AddRoom), new { id = room.ID }, room);
         }
-
-        [HttpPut("{id:length(24)}")]
+        [HttpPost("/{id}/addPriceInterval")]
         //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ("Administrator")]
-        public async Task<IActionResult> UpdateRoomByID(string id, [FromBody] Room newRoom)
+        public async Task<IActionResult> AddPriceInterval(string id, [FromBody] RoomPriceRange roomPriceRange)
         {
             var room = await _roomService.GetRoomById(id);
             if (room is null)
             {
                 return NotFound($"Room with id: {id} doesn't exist.");
             }
-            await _roomService.UpdateRoomByID(id, room);
+            await _roomService.AddPriceInterval(id, roomPriceRange);
+            return NoContent();
+        }
+        [HttpPut("{id:length(24)}")]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ("Administrator")]
+        public async Task<IActionResult> UpdateRoomByID(string id, [FromBody] Room newRoom)
+        {
+            var room = await _roomService.UpdateRoomByID(id, newRoom);
+            if (room is null)
+            {
+                return NotFound($"Room with id: {id} doesn't exist.");
+            }
             return NoContent();
         }
 

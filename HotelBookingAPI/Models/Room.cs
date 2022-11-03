@@ -19,19 +19,18 @@ namespace hotelBooking.Models
         [BsonElement("capacity")]
         [JsonPropertyName("capacity")]
         public decimal Capacity { get; set; }
-        [BsonElement("price")]
-        [JsonPropertyName("price")]
-        public decimal Price { get; set; }
+        [BsonElement("priceRanges")]
+        [JsonPropertyName("priceRanges")]
+        public List<RoomPriceRange> PriceRanges { get; set; } = new List<RoomPriceRange>();
+        [BsonElement("bookedDates")]
+        [JsonPropertyName("bookedDates")]
+        public List<BookedRoomInfo> BookedDates { get; set; } = new List<BookedRoomInfo>();
         [BsonElement("description")]
         [JsonPropertyName("description")]
         public string? Description { get; set; }
         [BsonElement("imageUrlLink")]
         [JsonPropertyName("imgUrlLink")]
         public string? ImageUrlLink { get; set; }
-
-        [BsonElement("booked")]
-        [JsonPropertyName("booked")]
-        public bool Booked { get; set; }
     }
 
 }

@@ -9,7 +9,8 @@ namespace HotelBookingAPI.Interfaces
         Task<string?> Login(UserLogin user);
         Task<string?> UpdateUser(User user);
         Task<string?> DeleteUser(string userID);
+        Task<User?> GetUserByID(string? ID);
         Task<List<User>> GetAllUsers();
-        Task<string?> AddRoomToUser(User user, Room room);
+        Task<string?> AddRoomToUser(BookedRoomInfo bookingInfo);
     }
 }

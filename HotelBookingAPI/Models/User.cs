@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 using System.Text.Json.Serialization;
+using HotelBookingAPI.Models;
 
 namespace hotelBooking.Models
 {
@@ -17,6 +18,6 @@ namespace hotelBooking.Models
         public string? Password { get; set; }
         [BsonElement("bookedRooms")]
         [JsonPropertyName("bookedRooms")]
-        public List<Room>? BookedRooms { get; set; }
+        public List<BookedRoomInfo>? BookedRooms { get; set; }
     }
 }

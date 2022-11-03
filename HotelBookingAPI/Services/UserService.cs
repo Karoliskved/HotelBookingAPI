@@ -63,7 +63,7 @@ namespace HotelBookingAPI.Services
             }
             return result;
         }
-        public async Task<User?> GetUserByID(string ID)
+        public async Task<User?> GetUserByID(string? ID)
         {
             var result = await _userCollection.Find(u => u.ID == ID).FirstOrDefaultAsync();
             if (result is null)
@@ -86,10 +86,10 @@ namespace HotelBookingAPI.Services
             await _userCollection.ReplaceOneAsync(u => u.ID == user.ID, user);
             return null;
         }
-        public async Task<string?> AddRoomToUser(User user, Room room)
+        public async Task<string?> AddRoomToUser(BookedRoomInfo bookedRoomInfo)
         {
-            FilterDefinition<User> filter = Builders<User>.Filter.Eq("ID", user.ID);
-            UpdateDefinition<User> update = Builders<User>.Update.AddToSet("BookedRooms", room);
+            FilterDefinition<User> filter = Builders<User>.Filter.Eq("ID", bookedRoomInfo.UserID);
+            UpdateDefinition<User> update = Builders<User>.Update.AddToSet("bookedRooms", bookedRoomInfo);
             await _userCollection.UpdateOneAsync(filter, update);
             return null;
         }

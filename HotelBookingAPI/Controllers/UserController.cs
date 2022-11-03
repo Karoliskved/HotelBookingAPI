@@ -1,10 +1,10 @@
 ﻿using hotelBooking.Models;
+using HotelBookingAPI.Models;
 using HotelBookingAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
-using MongoDB.Driver;
 using System.Security.Claims;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -54,17 +54,17 @@ namespace HotelBookingAPI.Controllers
             return BadRequest($"Invalid id: {id} provided.");
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("/bookHotelRoom/{id}")]
-        public async Task<IActionResult> BookHotelRoomByID(string id,[FromBody] User user)
+        [HttpPost("/bookHotelRoom")]
+        public async Task<IActionResult> BookHotelRoomByID([FromBody] RoomBookingInfo bookingInfo)
         {
-            if (ObjectId.TryParse(id, out _) || ObjectId.TryParse(user.ID, out _))
+            if (ObjectId.TryParse(bookingInfo.RoomID, out _) || ObjectId.TryParse(bookingInfo.UserID, out _))
             {
                 string? username = _context.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value;
                 if (username is null)
                 {
                     return Unauthorized();
                 }
-                var result = await _userService.GetUserByID(user.ID);
+                var result = await _userService.GetUserByID(bookingInfo.UserID);
                 if (result is null)
                 {
                     return NotFound("User doesn't exist.");
@@ -73,18 +73,20 @@ namespace HotelBookingAPI.Controllers
                 {
                     return Unauthorized();
                 }
-                var room = await _roomService.GetRoomById(user.ID);
+                var room = await _roomService.GetRoomById(bookingInfo.RoomID);
                 if(room is null)
                 {
-                    return NotFound($"Room with id: {id} doesn't exist.");
+                    return NotFound($"Room with id: {bookingInfo.RoomID} doesn't exist.");
                 }
-                    await _roomService.BookRoom(id);
-                    room = await _roomService.GetRoomById(id);
-                    await _userService.AddRoomToUser(user, room);
-                    return NoContent();
-               
+                var bookedRoomInfo = await _roomService.BookRoom(bookingInfo);
+                if (bookedRoomInfo is null)
+                {
+                    return BadRequest("Can't book the room with provided dates.");
                 }
-                return BadRequest($"Invalid id provided.");
+                await _userService.AddRoomToUser(bookedRoomInfo);
+                return Ok(bookedRoomInfo);
+                }
+                return BadRequest("Invalid id provided.");
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut("{id}")]
