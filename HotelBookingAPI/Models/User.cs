@@ -9,13 +9,13 @@ namespace hotelBooking.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string ID { get; set; }
+        public string? ID { get; set; }
         [BsonElement("username")]
         [JsonPropertyName("username")]
-        public string? Username { get; set; }
+        public string Username { get; set; } = string.Empty;
         [BsonElement("password")]
         [JsonPropertyName("password")]
-        public string? Password { get; set; }
+        public string Password { get; set; } = string.Empty;
         [BsonElement("bookedRooms")]
         [JsonPropertyName("bookedRooms")]
         public List<BookedRoomInfo> BookedRooms { get; set; } = new List<BookedRoomInfo>();
