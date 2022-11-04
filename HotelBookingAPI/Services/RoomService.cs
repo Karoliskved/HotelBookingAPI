@@ -75,7 +75,7 @@ namespace HotelBookingAPI.Services
             {
                 if (tempDate >= priceRange.FromDate.Date && tempDate <= priceRange.ToDate.Date)
                 {
-                    int count = priceRange.ToDate.Date.Subtract(priceRange.FromDate.Date).Days;
+                    int count = Math.Abs(tempDate.Subtract(priceRange.ToDate.Date).Days);
                     if (days == 0)
                     {
                         break;
@@ -83,13 +83,13 @@ namespace HotelBookingAPI.Services
                     if (count >= days)
                     {
                         price += days * priceRange.Price;
+                        tempDate = tempDate.AddDays(days);
                         days -= days;
-                        tempDate.AddDays(days);
                         continue;
                     }
                     price += count * priceRange.Price;
                     days -= count;
-                    tempDate.AddDays(count);
+                    tempDate = tempDate.AddDays(count);
                 }
             }
             if (days != 0)
