@@ -10,26 +10,35 @@ namespace hotelBooking.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? ID { get; set; }
-        [BsonElement("hotel")]
+        /*[BsonElement("hotel")]
         [JsonPropertyName("hotel")]
-        public Hotel? Hotel { get; set; }
+        public Hotel? Hotel { get; set; }*/ // dont know if its worth to keep the hotel object here
+        [BsonElement("hotelID")]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? HotelID { get; set; }
         [BsonElement("roomNumber")]
         [JsonPropertyName("roomNumber")]
         public decimal RoomNumber { get; set; }
         [BsonElement("capacity")]
         [JsonPropertyName("capacity")]
         public decimal Capacity { get; set; }
+        [BsonElement("address")]
+        [JsonPropertyName("address")]
+        public Address? Address { get; set; }
         [BsonElement("priceRanges")]
         [JsonPropertyName("priceRanges")]
         public List<RoomPriceRange> PriceRanges { get; set; } = new List<RoomPriceRange>();
         [BsonElement("bookedDates")]
         [JsonPropertyName("bookedDates")]
-        public List<BookedRoomInfo> BookedDates { get; set; } = new List<BookedRoomInfo>();
+        public List<BookedRoomInfo> BookedDates { get; set; } = new List<BookedRoomInfo>(); //is this not supposed to be RoomBookingInfo?
+        [BsonElement("extraAtributes")]
+        [JsonPropertyName("extraAtributes")]
+        public ExtraAtributes? ExtraAtributes { get; set; }
         [BsonElement("description")]
         [JsonPropertyName("description")]
         public string? Description { get; set; }
         [BsonElement("imageUrlLink")]
-        [JsonPropertyName("imgUrlLink")]
+        [JsonPropertyName("imageUrlLink")]
         public string? ImageUrlLink { get; set; }
     }
 

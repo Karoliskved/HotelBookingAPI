@@ -7,6 +7,9 @@ namespace HotelBookingAPI.Models
 {
     public class Hotel
     {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? ID { get; set; }
         [BsonElement("hotelName")]
         [JsonPropertyName("hotelName")]
         public string? HotelName { get; set; }
@@ -16,11 +19,15 @@ namespace HotelBookingAPI.Models
         [BsonElement("imageUrlLink")]
         [JsonPropertyName("imageUrlLink")]
         public string? ImageUrlLink { get; set; }
+        [BsonElement("geographicData")]
+        [JsonPropertyName("geographicData")]
+        public GeographicData? GeographicData { get; set; }
         [BsonElement("stars")]
         [JsonPropertyName("stars")]
-        public string? Stars { get; set; }
+        public int? Stars { get; set; }
         [BsonElement("contactInfo")]
         [JsonPropertyName("contactInfo")]
         public string? ContactInfo { get; set; }
+
     }
 }
