@@ -13,6 +13,9 @@ namespace hotelBooking.Models
         /*[BsonElement("hotel")]
         [JsonPropertyName("hotel")]
         public Hotel? Hotel { get; set; }*/ // dont know if its worth to keep the hotel object here
+        [BsonElement("hotelID")]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? HotelID { get; set; }
         [BsonElement("roomNumber")]
         [JsonPropertyName("roomNumber")]
         public decimal RoomNumber { get; set; }
