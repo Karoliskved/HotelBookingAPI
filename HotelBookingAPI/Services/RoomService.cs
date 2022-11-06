@@ -58,6 +58,10 @@ namespace HotelBookingAPI.Services
                 return null;
             }
             int days = bookingInfo.ToDate.Date.Subtract(bookingInfo.FromDate.Date).Days;
+            if (days <= 0)
+            {
+                return null;
+            }
             foreach (var bookedDate in room.BookedDates)
             {
                 if (bookingInfo.FromDate.Date >= bookedDate.FromDate.Date && bookingInfo.FromDate.Date <= bookedDate.ToDate.Date)
