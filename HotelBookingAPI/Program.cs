@@ -14,6 +14,7 @@ builder.Services.AddSingleton<IMongoClient, MongoClient>(s =>
 });
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<RoomService>();
+builder.Services.AddScoped<HotelService>();
 
 builder.Services.AddSwaggerGen(options =>
 {

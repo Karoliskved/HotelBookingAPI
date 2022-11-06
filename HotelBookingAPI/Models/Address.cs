@@ -14,8 +14,11 @@ namespace hotelBooking.Models
         [BsonElement("street")]
         [JsonPropertyName("street")]
         public string? Street { get; set; }
-        [BsonElement("houseNumber")]
-        [JsonPropertyName("houseNumber")]
+        [BsonElement("number")]
+        [JsonPropertyName("number")]
         public string? HouseNumber { get; set; }
+        [BsonElement("zipCode")]
+        [JsonPropertyName("zipCode")]
+        public string? ZIPCode { get; set; }
     }
 }
