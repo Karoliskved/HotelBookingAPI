@@ -7,7 +7,7 @@ namespace HotelBookingAPI.Models
     {
 
         [BsonElement("wifi")]
-        [JsonPropertyName("wifer")]
+        [JsonPropertyName("wifi")]
         public bool? Wifi { get; set; }
         [BsonElement("scenicView")]
         [JsonPropertyName("scenicView")]
