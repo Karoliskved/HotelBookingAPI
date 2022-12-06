@@ -78,16 +78,32 @@ namespace HotelBookingAPI.Controllers
             /*string[] atributes = { "geographicData.distToBeach", "geographicData.distToMountains" };
             double[] distances = { 26, 21 };*/
             /*
-               "atributes": [
-            "geographicData.distToBeach",
-            "geographicData.distToMountains"
-            ],
-            "distances": [
-            26, 21
-            ]*/
+                     {
+     "atributes": [
+    "geographicData.distToBeach", "geographicData.distToCity"
+  ],
+  "distances": [
+    26, 20
+  ],
+  "operators": [
+    "Lt", "Gt"
+  ]
+
+     ***************
+      "atributes": [
+    "geographicData.distToBeach", "geographicData.distToBeach"
+  ],
+  "distances": [
+    30, 10
+  ],
+  "operators": [
+    "Lt", "Gt"
+  ]
+}*/
             string[]? atributes = input.Atributes;
             double[]? distances = input.Distances;
-            var hotel = await _hotelService.GetHotelByMultiParam(atributes, distances);
+            string[]? operators = input.Operators;
+            var hotel = await _hotelService.GetHotelByMultiParam(atributes, distances, operators);
             if (hotel is not null)
             {
                 return Ok(hotel);
