@@ -59,12 +59,25 @@ namespace HotelBookingAPI.Controllers
             return NotFound($"Room with id: {dist} doesn't exist.");
 
         }
-        [HttpGet("closebeach")]
+        /*
+         "atributes": [
+    "GeographicData.DistToRestaurant",
+"GeographicData.DistToBeach"
+  ],
+  "operators": [
+    "0",
+"1"
+  ]
+         */
+        [HttpPost("multi/sort")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetHotelByClosestTotheBeach()
+        public async Task<IActionResult> SortHotesl([FromBody] FilterSort  input)
 
         {
-            var hotel = await _hotelService.GetHotelByClosestTotheBeach();
+            string[]? atributes = input.Atributes;
+
+            string[]? operators = input.Operators;
+            var hotel = await _hotelService.SortHotels(atributes, operators);
             if (hotel is not null)
             {
                 return Ok(hotel);
