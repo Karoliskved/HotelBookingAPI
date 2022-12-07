@@ -8,7 +8,7 @@ namespace HotelBookingAPI.Models
     {
         [BsonElement("price")]
         [JsonPropertyName("price")]
-        public decimal Price { get; set; }
+        public decimal? Price { get; set; }
         [BsonElement("from")]
         [JsonPropertyName("from")]
         public DateTime FromDate { get; set; }

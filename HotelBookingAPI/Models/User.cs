@@ -16,8 +16,16 @@ namespace hotelBooking.Models
         [BsonElement("password")]
         [JsonPropertyName("password")]
         public string Password { get; set; } = string.Empty;
+        [BsonElement("role")]
+        [JsonPropertyName("role")]
+        public Role Role { get; set; }
         [BsonElement("bookedRooms")]
         [JsonPropertyName("bookedRooms")]
         public List<BookedRoomInfo> BookedRooms { get; set; } = new List<BookedRoomInfo>();
+    }
+    public enum Role
+    {
+        User,
+        Administrator
     }
 }

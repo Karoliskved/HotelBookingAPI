@@ -73,7 +73,7 @@ namespace HotelBookingAPI.Services
                     return null;
                 }
             }
-            decimal price = 0;
+            decimal? price = 0;
             var tempDate = bookingInfo.FromDate.Date;
             foreach (var priceRange in room.PriceRanges)
             {
@@ -119,6 +119,53 @@ namespace HotelBookingAPI.Services
             UpdateDefinition<Room> update = Builders<Room>.Update.AddToSet("priceRanges", roomPriceRange);
             await _roomCollection.UpdateOneAsync(filter, update);
             return null;
+        }
+        public async Task<List<BookedDateRange>?> ShowAvailableBookingDates(string id)
+        {
+            var room = await GetRoomById(id);
+            DateTime now = DateTime.Today.Date;
+            DateTime yearAfterNow = now.AddDays(365);
+            List<BookedDateRange> availableBookingDates = new();
+            if (room is not null)
+            {
+               room.BookedDates.Sort((x, y) => DateTime.Compare(x.FromDate, y.FromDate));
+                DateTime intervalStart = now;
+                DateTime intervalEnd = now;
+            foreach (var bookedDate in room.BookedDates)
+            {
+                    // dates don't overlap
+                    if (intervalStart >= bookedDate.ToDate.Date || intervalEnd <= bookedDate.FromDate.Date)
+                    {
+                        intervalEnd = bookedDate.FromDate.Date;
+                    }
+                    else
+                    {
+                        intervalStart = bookedDate.ToDate.Date;
+                        intervalEnd = bookedDate.ToDate.Date;
+                        continue;
+                    }
+                    BookedDateRange availableBookingDate = new()
+                    {
+                        FromDate = intervalStart,
+                        ToDate = intervalEnd
+                    };
+                    availableBookingDates.Add(availableBookingDate);
+                    intervalStart = bookedDate.ToDate.Date;
+                    intervalEnd = bookedDate.ToDate.Date;
+            }
+            if (room.BookedDates[room.BookedDates.Count-1].ToDate < yearAfterNow)
+            {
+                    BookedDateRange availableBookingDate = new()
+                    {
+                        FromDate = intervalStart,
+                        ToDate = yearAfterNow
+                    };
+                    availableBookingDates.Add(availableBookingDate);
+                }
+            return availableBookingDates;
+            }
+            return null;
+
         }
     }
 }

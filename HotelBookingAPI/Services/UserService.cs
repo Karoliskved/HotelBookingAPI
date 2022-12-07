@@ -30,7 +30,24 @@ namespace HotelBookingAPI.Services
                 User newUser = new()
                 {
                     Username = user.Username,
-                    Password = HashPassword(user.Password)
+                    Password = HashPassword(user.Password),
+                    Role = Role.User
+                };
+                await _userCollection.InsertOneAsync(newUser);
+                return newUser;
+            }
+            return null;
+        }
+        public async Task<User?> RegisterAdmin(UserLogin user)
+        {
+            var result = await _userCollection.Find(u => u.Username == user.Username).FirstOrDefaultAsync();
+            if (result is null)
+            {
+                User newUser = new()
+                {
+                    Username = user.Username,
+                    Password = HashPassword(user.Password),
+                    Role = Role.Administrator
                 };
                 await _userCollection.InsertOneAsync(newUser);
                 return newUser;
@@ -49,7 +66,8 @@ namespace HotelBookingAPI.Services
                 User newUser = new()
                 {
                     Username = user.Username,
-                    Password = HashPassword(user.Password)
+                    Password = HashPassword(user.Password),
+                    Role = result.Role
                 };
                 string token = CreateToken(newUser);
                 return token;
@@ -99,7 +117,8 @@ namespace HotelBookingAPI.Services
         {
             List<Claim> claims = new()
             {
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role,user.Role.ToString())
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(

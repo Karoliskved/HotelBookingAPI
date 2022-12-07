@@ -1,12 +1,10 @@
 ﻿using hotelBooking.Models;
 using HotelBookingAPI.Models;
 using HotelBookingAPI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
-using MongoDB.Driver;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace HotelBookingAPI.Controllers
 {
@@ -46,16 +44,26 @@ namespace HotelBookingAPI.Controllers
             }
             return BadRequest($"Invalid id: {id} provided.");
         }
-
+        [HttpGet("/availableBookingDates/{id:length(24)}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAvailableBookingDates(string id)
+        {
+            var result = await _roomService.ShowAvailableBookingDates(id);
+            if(result is  null)
+            {
+                return NotFound("Room with id: {id} doesn't exist.");
+            }
+            return Ok(result);
+        }
         [HttpPost("/add")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ("Administrator")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
         public async Task<IActionResult> AddRoom([FromBody] Room room)
         {
             await _roomService.AddRoom(room);
             return CreatedAtAction(nameof(AddRoom), new { id = room.ID }, room);
         }
         [HttpPost("/{id}/addPriceInterval")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ("Administrator")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
         public async Task<IActionResult> AddPriceInterval(string id, [FromBody] RoomPriceRange roomPriceRange)
         {
             var room = await _roomService.GetRoomById(id);
@@ -67,7 +75,7 @@ namespace HotelBookingAPI.Controllers
             return NoContent();
         }
         [HttpPut("{id:length(24)}")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ("Administrator")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
         public async Task<IActionResult> UpdateRoomByID(string id, [FromBody] Room newRoom)
         {
             var room = await _roomService.UpdateRoomByID(id, newRoom);
@@ -79,7 +87,7 @@ namespace HotelBookingAPI.Controllers
         }
 
         [HttpDelete("{id:length(24)}")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ("Administrator")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
         public async Task<IActionResult> DeleteRoom(string id)
         {
             await _roomService.DeleteRoomByID(id);

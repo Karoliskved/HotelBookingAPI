@@ -6,6 +6,7 @@ namespace HotelBookingAPI.Interfaces
     public interface IUser
     {
         Task<User?> Register(UserLogin user);
+        Task<User?> RegisterAdmin(UserLogin user);
         Task<string?> Login(UserLogin user);
         Task<string?> UpdateUser(User user);
         Task<string?> DeleteUser(string userID);

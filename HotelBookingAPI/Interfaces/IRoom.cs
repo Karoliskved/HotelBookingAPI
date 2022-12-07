@@ -14,7 +14,6 @@ namespace HotelBookingAPI.Interfaces
         Task<string?> AddPriceInterval(string id, RoomPriceRange roomPriceRange);
         Task<string?> DeleteRoomByID(string id);
         Task<BookedRoomInfo?> BookRoom(RoomBookingInfo bookingInfo);
-
-
+        Task<List<BookedDateRange>?> ShowAvailableBookingDates(string id);
 }
 }

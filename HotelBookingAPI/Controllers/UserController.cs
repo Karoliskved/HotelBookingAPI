@@ -24,8 +24,8 @@ namespace HotelBookingAPI.Controllers
             _roomService = roomService;
             _context = httpContextAccessor;
         }
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = ("Administrator")]
         [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
         public async Task<List<User>> GetUsers() =>  await _userService.GetAllUsers();
        
         [HttpGet("{id}")]
@@ -53,8 +53,8 @@ namespace HotelBookingAPI.Controllers
             }
             return BadRequest($"Invalid id: {id} provided.");
         }
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("/bookHotelRoom")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> BookHotelRoomByID([FromBody] RoomBookingInfo bookingInfo)
         {
             if (ObjectId.TryParse(bookingInfo.RoomID, out _) || ObjectId.TryParse(bookingInfo.UserID, out _))
@@ -88,8 +88,8 @@ namespace HotelBookingAPI.Controllers
                 }
                 return BadRequest("Invalid id provided.");
         }
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPut("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] User user)
         {
             if (ObjectId.TryParse(id, out _))
@@ -113,8 +113,8 @@ namespace HotelBookingAPI.Controllers
             }
             return BadRequest($"Invalid id: {id} provided.");
         }
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Delete(string id)
         {
             if (ObjectId.TryParse(id, out _))
