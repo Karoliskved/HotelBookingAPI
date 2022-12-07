@@ -5,6 +5,7 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Core;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace HotelBookingAPI.Services
 {
@@ -30,23 +31,66 @@ namespace HotelBookingAPI.Services
         {
             return await _hotelCollection.Find(hotel => hotel.GeographicData.DistToBeach <= id).FirstOrDefaultAsync();
         }
-        public async Task<List<Hotel>> GetHotelByMultiParam(string[] atributes, double[] distances)
+        public async Task<List<Hotel>> GetHotelByMultiParam(string[] atributes, double[] distances, string[] operators)
         {
-            var _tempHotelcollection = _hotelCollection;
             var builder = Builders<Hotel>.Filter;
-            var filter = builder.Lt(atributes[0], distances[0]);
-            for(int i = 1; i < atributes.Length; i++)
+            var filter = builder.Empty;
+            for (int i = 0; i < atributes.Length; i++)
             {
-                filter=filter & builder.Lt(atributes[i], distances[i]); 
-               // _tempHotelcollection= _tempHotelcollection.Find(hotel =>  hotel.GeographicData.GetType().GetProperty("DistToShop").GetValue(hotel.GeographicData, null) == distances[i]).FirstOrDefaultAsync();
+                switch (operators[i])
+                {
+                    case "Lt":
+                        filter = filter & builder.Lt(atributes[i], distances[i]);
+                        break;
+                    case "Gt":
+                        filter = filter & builder.Gt(atributes[i], distances[i]);
+                        break;
+                }
+
+
+
+                // _tempHotelcollection= _tempHotelcollection.Find(hotel =>  hotel.GeographicData.GetType().GetProperty("DistToShop").GetValue(hotel.GeographicData, null) == distances[i]).FirstOrDefaultAsync();
             }
             return await _hotelCollection.Find(filter).ToListAsync();
         }
-        public async Task<List<Hotel>> GetHotelByClosestTotheBeach()
-        {
+        public async Task<List<Hotel>> SortHotels(string[] atributes, string[] operators)
+        { 
+            string sortString = "{";
+            var bldr = Builders<Hotel>.Sort;
+            int i = 0;
+            var sortDefinitions = atributes.Select(x =>
+            {
+                
+                SortDefinition<Hotel> sortDef;
+                if (operators[i] == "1")
+                {
+                    sortDef = bldr.Descending(x);
+                }
+                else if (operators[i] == "0")
+                {
+                    sortDef = bldr.Ascending(x);
+                }
+                else
+                {
+                    sortDef = null;
+                }
+                i++;
+                return sortDef;
+            });
+            /* for (int i = 0; i < atributes.Length; i++)
+             {
+                 sortString += atributes[i] + ": " + operators[i];
+                 if (i != atributes.Length - 1)
+                 {
+                     sortString += ", ";
+                 }
+             }
+             sortString += "}";*/
+            var sortDef = bldr.Combine(sortDefinitions);
+           
+            return await _hotelCollection.Find(_ => true).Limit(100).Sort(sortDef).ToListAsync();
 
-            return await _hotelCollection.Find(_ => true).Limit(10).Sort(Builders<Hotel>.Sort.Ascending("GeographicData.DistToBeach")).ToListAsync();
+
         }
     }
-    
 }
