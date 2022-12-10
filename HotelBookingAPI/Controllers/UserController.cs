@@ -138,5 +138,17 @@ namespace HotelBookingAPI.Controllers
             }
             return BadRequest($"Invalid id: {id} provided.");
         }
+        [HttpPost("/{id}/CalculateExtras")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CalculateExtraCosts(string id, [FromBody] string[] additionalExpenses)
+        {
+            var room = await _roomService.GetRoomById(id);
+            if (room is null)
+            {
+                return NotFound($"Room with id: {id} doesn't exist.");
+            }
+            var extracost=await  _roomService.CalculateAdditionalexpenses(additionalExpenses, id);
+            return Ok(extracost);
+        }
     }
 }

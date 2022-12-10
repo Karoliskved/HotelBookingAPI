@@ -20,5 +20,6 @@ namespace HotelBookingAPI.Interfaces
         Task<string?> DeleteRoomByID(string id);
         Task<BookedRoomInfo?> BookRoom(RoomBookingInfo bookingInfo);
         Task<List<BookedDateRange>?> ShowAvailableBookingDates(string id);
+        Task<double?> CalculateAdditionalexpenses(string[] selectedExpenses, string id);
 }
 }

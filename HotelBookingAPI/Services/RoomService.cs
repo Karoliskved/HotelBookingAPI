@@ -233,6 +233,20 @@ namespace HotelBookingAPI.Services
             }
             return await _roomCollection.Find(filter).ToListAsync();
         }
+        public static object GetPropValue(object src, string propName)
+        {
+            return src.GetType().GetProperty(propName).GetValue(src, null);
+        }
+        public async Task<double?> CalculateAdditionalexpenses(string[] selectedExpenses, string id) {
+            var room = await GetRoomById(id);
+            double finalExpense = 0;
+            foreach (var expense in selectedExpenses)
+            {
+
+                finalExpense+=(Double)GetPropValue(room.AditionalPurchases, expense);
+            }  
+            return finalExpense;
+        }
     }
 }
 
