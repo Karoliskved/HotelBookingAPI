@@ -6,6 +6,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Core;
 using Microsoft.AspNetCore.Components.Forms;
+using System.Collections;
 
 namespace HotelBookingAPI.Services
 {
@@ -31,7 +32,7 @@ namespace HotelBookingAPI.Services
         {
             return await _hotelCollection.Find(hotel => hotel.GeographicData.DistToBeach <= id).FirstOrDefaultAsync();
         }
-        public async Task<List<Hotel>> GetHotelByMultiParam(string[] atributes, double[] distances, string[] operators)
+        public async Task<List<Hotel>> GetHotelByMultiParam(string[] atributes, Object[] distances, string[] operators)
         {
             var builder = Builders<Hotel>.Filter;
             var filter = builder.Empty;
@@ -44,6 +45,9 @@ namespace HotelBookingAPI.Services
                         break;
                     case "Gt":
                         filter = filter & builder.Gt(atributes[i], distances[i]);
+                        break;
+                    case "Eq":
+                        filter = filter & builder.Eq(atributes[i], distances[i]);
                         break;
                 }
 
