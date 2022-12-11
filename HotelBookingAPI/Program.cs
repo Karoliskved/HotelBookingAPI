@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
-using HotelBookingAPI.Interfaces;
 using HotelBookingAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);

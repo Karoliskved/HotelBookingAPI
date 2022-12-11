@@ -8,8 +8,10 @@ namespace HotelBookingAPI.Models
     public class Hotel
     {
         [BsonId]
+        [BsonElement("hotelID")]
+        [JsonPropertyName("hotelID")]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? ID { get; set; }
+        public string? HotelID { get; set; }
         [BsonElement("hotelName")]
         [JsonPropertyName("hotelName")]
         public string? HotelName { get; set; }

@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using System.Security.Claims;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace HotelBookingAPI.Controllers
 {
@@ -26,22 +25,22 @@ namespace HotelBookingAPI.Controllers
         }
         [HttpGet]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
-        public async Task<List<User>> GetUsers() =>  await _userService.GetAllUsers();
-       
+        public async Task<List<User>> GetUsers() => await _userService.GetAllUsers();
+
         [HttpGet("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetUserByID(string id)
         {
             if (ObjectId.TryParse(id, out _))
             {
-                
+
                 string? username = _context.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value;
                 if (username is null)
                 {
                     return Unauthorized();
                 }
                 var user = await _userService.GetUserByID(id);
-                if(user is null)
+                if (user is null)
                 {
                     return NotFound($"User with id: {id} doesn't exist.");
                 }
@@ -53,7 +52,7 @@ namespace HotelBookingAPI.Controllers
             }
             return BadRequest($"Invalid id: {id} provided.");
         }
-        [HttpPost("/bookHotelRoom")]
+        [HttpPost("bookHotelRoom")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> BookHotelRoomByID([FromBody] RoomBookingInfo bookingInfo)
         {
@@ -74,7 +73,7 @@ namespace HotelBookingAPI.Controllers
                     return Unauthorized();
                 }
                 var room = await _roomService.GetRoomById(bookingInfo.RoomID);
-                if(room is null)
+                if (room is null)
                 {
                     return NotFound($"Room with id: {bookingInfo.RoomID} doesn't exist.");
                 }
@@ -85,8 +84,38 @@ namespace HotelBookingAPI.Controllers
                 }
                 await _userService.AddRoomToUser(bookedRoomInfo);
                 return Ok(bookedRoomInfo);
+            }
+            return BadRequest("Invalid id provided.");
+        }
+        [HttpGet("{id}/getBookedRooms")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> ShowBookedRooms(string id)
+        {
+            if (ObjectId.TryParse(id, out _))
+            {
+
+                string? username = _context.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value;
+                if (username is null)
+                {
+                    return Unauthorized();
                 }
-                return BadRequest("Invalid id provided.");
+                var user = await _userService.GetUserByID(id);
+                if (user is null)
+                {
+                    return NotFound($"User with id: {id} doesn't exist.");
+                }
+                if (user.Username != username)
+                {
+                    return Unauthorized();
+                }
+                var result = _userService.GetBookedRooms(id);
+                if (result is null)
+                {
+                    return StatusCode(500);
+                }
+                return Ok(result.Result.ToArray());
+            }
+            return BadRequest($"Invalid id: {id} provided.");
         }
         [HttpPut("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -125,7 +154,7 @@ namespace HotelBookingAPI.Controllers
                     return Unauthorized();
                 }
                 var user = await _userService.GetUserByID(id);
-                if(user is null)
+                if (user is null)
                 {
                     return NotFound("User doesn't exist.");
                 }

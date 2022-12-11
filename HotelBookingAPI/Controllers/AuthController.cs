@@ -19,7 +19,7 @@ namespace HotelBookingAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("/register")]
+        [HttpPost("register")]
         public async Task<ActionResult<User>> Register([FromBody] UserLogin user)
         {
             var newUser = await _userService.Register(user);
@@ -27,10 +27,10 @@ namespace HotelBookingAPI.Controllers
             {
                 return BadRequest("User already exists.");
             }
-            return CreatedAtAction(nameof(Register), new { id = newUser.ID }, newUser);
+            return CreatedAtAction(nameof(Register), new { id = newUser.UserID }, newUser);
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
-        [HttpPost("/registerAdmin")]
+        [HttpPost("registerAdmin")]
         public async Task<ActionResult<User>> RegisterAdmin([FromBody] UserLogin admin)
         {
             var newAdmin = await _userService.RegisterAdmin(admin);
@@ -38,10 +38,10 @@ namespace HotelBookingAPI.Controllers
             {
                 return BadRequest("Administrator already exists.");
             }
-            return CreatedAtAction(nameof(RegisterAdmin), new { id = newAdmin.ID }, newAdmin);
+            return CreatedAtAction(nameof(RegisterAdmin), new { id = newAdmin.UserID }, newAdmin);
         }
         [AllowAnonymous]
-        [HttpPost("/login")]
+        [HttpPost("login")]
         public async Task<ActionResult<string>> Login([FromBody] UserLogin user)
         {
             var result = await _userService.Login(user);

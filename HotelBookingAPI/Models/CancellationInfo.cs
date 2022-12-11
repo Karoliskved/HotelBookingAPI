@@ -1,24 +1,21 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations;
 
 namespace HotelBookingAPI.Models
 {
-    public class RoomBookingInfo
+    public class CancellationInfo
     {
+        [Required]
         [BsonElement("userID")]
         [JsonPropertyName("userID")]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? UserID { get; set; }
+        [Required]
         [BsonElement("roomID")]
         [JsonPropertyName("roomID")]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? RoomID { get; set; }
-        [BsonElement("from")]
-        [JsonPropertyName("from")]
-        public DateTime FromDate { get; set; }
-        [BsonElement("to")]
-        [JsonPropertyName("to")]
-        public DateTime ToDate { get; set; }
     }
 }

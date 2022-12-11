@@ -8,6 +8,7 @@ namespace HotelBookingAPI.Interfaces
     {
         Task<List<Hotel>> GetAllHotels();
         Task<Hotel> GetHotelById(string? id);
+        Task<string?> AddHotel(Hotel hotel);
         Task<Hotel> GetHotelByDistToBeach(double? id);
         Task<List<Hotel>> SortHotels(string[] atributes, string[] operators);
         Task<List<Hotel>> GetHotelByMultiParam(string[] atributes, Object[] distances, string[] operators);

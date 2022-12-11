@@ -20,9 +20,9 @@ namespace HotelBookingAPI.Controllers
         }
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAllRooms()
+        public async Task<IActionResult> GetAllRooms([FromBody] int? limit)
         {
-            var rooms = await _roomService.GetAllRooms();
+            var rooms = await _roomService.GetAllRooms(limit);
             if (rooms is not null)
             {
                 return Ok(rooms);
@@ -136,7 +136,7 @@ namespace HotelBookingAPI.Controllers
             }
             return BadRequest($"Invalid id: {id} provided.");
         }
-        [HttpGet("/availableBookingDates/{id:length(24)}")]
+        [HttpGet("{id:length(24)}/availableBookingDates")]
         [AllowAnonymous]
         public async Task<IActionResult> GetAvailableBookingDates(string id)
         {
@@ -147,14 +147,14 @@ namespace HotelBookingAPI.Controllers
             }
             return Ok(result);
         }
-        [HttpPost("/add")]
+        [HttpPost("add")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
         public async Task<IActionResult> AddRoom([FromBody] Room room)
         {
             await _roomService.AddRoom(room);
-            return CreatedAtAction(nameof(AddRoom), new { id = room.ID }, room);
+            return CreatedAtAction(nameof(AddRoom), new { id = room.RoomID }, room);
         }
-        [HttpPost("/{id}/addPriceInterval")]
+        [HttpPost("{id}/addPriceInterval")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
         public async Task<IActionResult> AddPriceInterval(string id, [FromBody] RoomPriceRange roomPriceRange)
         {
