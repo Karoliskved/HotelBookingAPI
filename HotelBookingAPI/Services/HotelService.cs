@@ -33,6 +33,22 @@ namespace HotelBookingAPI.Services
             await _hotelCollection.InsertOneAsync(hotel);
             return null;
         }
+        public async Task<Hotel?> UpdateHotelByID(string id, Hotel newHotel)
+        {
+            var room = await GetHotelById(id);
+            if (room is null)
+            {
+                return null;
+            }
+            await _hotelCollection.ReplaceOneAsync(hotel => hotel.HotelID == id, newHotel);
+            return newHotel;
+        }
+
+        public async Task<string?> DeleteHotelByID(string id)
+        {
+            await _hotelCollection.DeleteOneAsync(hotel => hotel.HotelID == id);
+            return null;
+        }
         public async Task<Hotel> GetHotelByDistToBeach(double? id)
         {
             return await _hotelCollection.Find(hotel => hotel.GeographicData.DistToBeach <= id).FirstOrDefaultAsync();

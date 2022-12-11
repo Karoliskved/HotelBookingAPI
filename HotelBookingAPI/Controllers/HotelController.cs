@@ -38,6 +38,25 @@ namespace HotelBookingAPI.Controllers
             await _hotelService.AddHotel(hotel);
             return CreatedAtAction(nameof(AddHotel), new { id = hotel.HotelID }, hotel);
         }
+        [HttpPut("{id:length(24)}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
+        public async Task<IActionResult> UpdateRoomByID(string id, [FromBody] Hotel newHotel)
+        {
+            var room = await _hotelService.UpdateHotelByID(id, newHotel);
+            if (room is null)
+            {
+                return NotFound($"Room with id: {id} doesn't exist.");
+            }
+            return NoContent();
+        }
+
+        [HttpDelete("{id:length(24)}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
+        public async Task<IActionResult> DeleteRoom(string id)
+        {
+            await _hotelService.DeleteHotelByID(id);
+            return NoContent();
+        }
         [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetHotelById(string id)
