@@ -14,13 +14,17 @@ namespace HotelBookingAPI.Services
             var database = client.GetDatabase("HotelRoomsDB");
             _roomCollection = database.GetCollection<Room>("Rooms");
         }
-        public async Task<List<Room>> GetAllRooms()
+        public async Task<List<Room>> GetAllRooms(int? limit)
         {
-            return await _roomCollection.Find(_ => true).ToListAsync();
+            if (limit is null)
+            {
+                return await _roomCollection.Find(_ => true).ToListAsync();
+            }
+            return await _roomCollection.Find(_ => true).Limit(limit).ToListAsync();
         }
         public async Task<Room> GetRoomById(string? id)
         {
-            return await _roomCollection.Find(room => room.ID == id).FirstOrDefaultAsync();
+            return await _roomCollection.Find(room => room.RoomID == id).FirstOrDefaultAsync();
         }
 
         public async Task<string?> AddRoom(Room room)
@@ -36,13 +40,13 @@ namespace HotelBookingAPI.Services
             {
                 return null;
             }
-            await _roomCollection.ReplaceOneAsync(room => room.ID == id, newRoom);
+            await _roomCollection.ReplaceOneAsync(room => room.RoomID == id, newRoom);
             return newRoom;
         }
 
         public async Task<string?> DeleteRoomByID(string id)
         {
-            await _roomCollection.DeleteOneAsync(room => room.ID == id);
+            await _roomCollection.DeleteOneAsync(room => room.RoomID == id);
             return null;
         }
 
@@ -64,11 +68,7 @@ namespace HotelBookingAPI.Services
             }
             foreach (var bookedDate in room.BookedDates)
             {
-                if (bookingInfo.FromDate.Date >= bookedDate.FromDate.Date && bookingInfo.FromDate.Date <= bookedDate.ToDate.Date)
-                {
-                    return null;
-                }
-                if (bookingInfo.ToDate.Date >= bookedDate.FromDate.Date && bookingInfo.ToDate.Date <= bookedDate.ToDate.Date)
+                if (!(bookingInfo.FromDate.Date >= bookedDate.ToDate.Date || bookingInfo.ToDate.Date <= bookedDate.FromDate.Date))
                 {
                     return null;
                 }
@@ -108,14 +108,14 @@ namespace HotelBookingAPI.Services
                 FromDate = bookingInfo.FromDate,
                 ToDate = bookingInfo.ToDate
             };
-            FilterDefinition<Room> filter = Builders<Room>.Filter.Eq("ID", bookingInfo.RoomID);
-            UpdateDefinition<Room> update = Builders<Room>.Update.AddToSet("BookedDates", bookedRoomInfo);
+            FilterDefinition<Room> filter = Builders<Room>.Filter.Eq("RoomID", bookingInfo.RoomID);
+            UpdateDefinition<Room> update = Builders<Room>.Update.AddToSet("bookedDates", bookedRoomInfo);
             await _roomCollection.UpdateOneAsync(filter, update);
             return bookedRoomInfo;
         }
         public async Task<string?> AddPriceInterval(string id, RoomPriceRange roomPriceRange)
         {
-            FilterDefinition<Room> filter = Builders<Room>.Filter.Eq("ID", id);
+            FilterDefinition<Room> filter = Builders<Room>.Filter.Eq("RoomID", id);
             UpdateDefinition<Room> update = Builders<Room>.Update.AddToSet("priceRanges", roomPriceRange);
             await _roomCollection.UpdateOneAsync(filter, update);
             return null;
@@ -123,7 +123,7 @@ namespace HotelBookingAPI.Services
         public async Task<List<BookedDateRange>?> ShowAvailableBookingDates(string id)
         {
             var room = await GetRoomById(id);
-            DateTime now = DateTime.Today.Date;
+            DateTime now = DateTime.Now.Date;
             DateTime yearAfterNow = now.AddDays(365);
             List<BookedDateRange> availableBookingDates = new();
             if (room is not null)
@@ -133,7 +133,6 @@ namespace HotelBookingAPI.Services
                 DateTime intervalEnd = now;
             foreach (var bookedDate in room.BookedDates)
             {
-                    // dates don't overlap
                     if (intervalStart >= bookedDate.ToDate.Date || intervalEnd <= bookedDate.FromDate.Date)
                     {
                         intervalEnd = bookedDate.FromDate.Date;
@@ -166,6 +165,13 @@ namespace HotelBookingAPI.Services
             }
             return null;
 
+        }
+        public async Task<string?> CancelBooking(CancellationInfo cancellationInfo)
+        {
+            var filter = Builders<Room>.Filter.Eq("RoomID", cancellationInfo.RoomID);
+            var update = Builders<Room>.Update.PullFilter(x => x.BookedDates, y => y.UserID == cancellationInfo.UserID);
+            await _roomCollection.UpdateOneAsync(filter, update);
+            return null;
         }
     }
 }

@@ -5,7 +5,7 @@ namespace HotelBookingAPI.Interfaces
 {
     public interface IRoom
     {
-        Task<List<Room>> GetAllRooms();
+        Task<List<Room>> GetAllRooms(int? limit);
         Task<Room> GetRoomById(string? id);
         Task<string?> AddRoom(Room room);
 
@@ -15,5 +15,6 @@ namespace HotelBookingAPI.Interfaces
         Task<string?> DeleteRoomByID(string id);
         Task<BookedRoomInfo?> BookRoom(RoomBookingInfo bookingInfo);
         Task<List<BookedDateRange>?> ShowAvailableBookingDates(string id);
+        Task<string?> CancelBooking(CancellationInfo cancellationInfo);
 }
 }

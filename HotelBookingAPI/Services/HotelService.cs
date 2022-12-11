@@ -25,7 +25,12 @@ namespace HotelBookingAPI.Services
         }
         public async Task<Hotel> GetHotelById(string? id)
         {
-            return await _hotelCollection.Find(hotel => hotel.ID == id).FirstOrDefaultAsync();
+            return await _hotelCollection.Find(hotel => hotel.HotelID == id).FirstOrDefaultAsync();
+        }
+        public async Task<string?> AddHotel(Hotel hotel)
+        {
+            await _hotelCollection.InsertOneAsync(hotel);
+            return null;
         }
         public async Task<Hotel> GetHotelByDistToBeach(double? id)
         {

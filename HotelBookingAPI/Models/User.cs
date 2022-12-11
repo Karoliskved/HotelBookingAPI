@@ -8,8 +8,10 @@ namespace hotelBooking.Models
     public class User
     {
         [BsonId]
+        [BsonElement("userID")]
+        [JsonPropertyName("userID")]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? ID { get; set; }
+        public string? UserID { get; set; }
         [BsonElement("username")]
         [JsonPropertyName("username")]
         public string Username { get; set; } = string.Empty;

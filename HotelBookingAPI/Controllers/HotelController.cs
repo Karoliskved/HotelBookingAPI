@@ -1,6 +1,7 @@
 ﻿using hotelBooking.Models;
 using HotelBookingAPI.Models;
 using HotelBookingAPI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
@@ -28,6 +29,13 @@ namespace HotelBookingAPI.Controllers
                 return Ok(hotels);
             }
             return NotFound("There are no hotels in the database.");
+        }
+        [HttpPost("add")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
+        public async Task<IActionResult> AddHotel([FromBody] Hotel hotel)
+        {
+            await _hotelService.AddHotel(hotel);
+            return CreatedAtAction(nameof(AddHotel), new { id = hotel.HotelID }, hotel);
         }
         [HttpGet("{id}")]
         [AllowAnonymous]

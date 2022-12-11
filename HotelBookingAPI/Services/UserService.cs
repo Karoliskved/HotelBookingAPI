@@ -3,7 +3,9 @@ using HotelBookingAPI.Interfaces;
 using HotelBookingAPI.Models;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -85,7 +87,7 @@ namespace HotelBookingAPI.Services
         }
         public async Task<User?> GetUserByID(string? ID)
         {
-            var result = await _userCollection.Find(u => u.ID == ID).FirstOrDefaultAsync();
+            var result = await _userCollection.Find(u => u.UserID == ID).FirstOrDefaultAsync();
             if (result is null)
             {
                 return null;
@@ -98,20 +100,36 @@ namespace HotelBookingAPI.Services
         }
         public async Task<string?> DeleteUser(string userID)
         {
-            await _userCollection.DeleteOneAsync(user => user.ID == userID);
+            await _userCollection.DeleteOneAsync(user => user.UserID == userID);
             return null;
         }
         public async Task<string?> UpdateUser(User user)
         {
-            await _userCollection.ReplaceOneAsync(u => u.ID == user.ID, user);
+            await _userCollection.ReplaceOneAsync(u => u.UserID == user.UserID, user);
             return null;
         }
         public async Task<string?> AddRoomToUser(BookedRoomInfo bookedRoomInfo)
         {
-            FilterDefinition<User> filter = Builders<User>.Filter.Eq("ID", bookedRoomInfo.UserID);
+            FilterDefinition<User> filter = Builders<User>.Filter.Eq("UserID", bookedRoomInfo.UserID);
             UpdateDefinition<User> update = Builders<User>.Update.AddToSet("bookedRooms", bookedRoomInfo);
             await _userCollection.UpdateOneAsync(filter, update);
             return null;
+        }
+        public async Task<string?> CancelBooking(CancellationInfo cancellationInfo)
+        {
+            var filter = Builders<User>.Filter.Eq("UserID",cancellationInfo.UserID);
+            var update = Builders<User>.Update.PullFilter(x => x.BookedRooms, y => y.RoomID == cancellationInfo.RoomID);
+            await _userCollection.UpdateOneAsync(filter, update);
+            return null;
+        }
+        public async Task<List<BookedRoomInfo>> GetBookedRooms(string id)
+        {
+            var filter = Builders<User>.Filter.Eq("UserID", id);
+            var projection = Builders<User>.Projection.Include("bookedRooms");
+            var options = new FindOptions<User> { Projection = projection };
+            var result = await _userCollection.FindAsync(filter, options);
+            var array = result.ToList();
+            return array[0].BookedRooms;
         }
         private string CreateToken(User user)
         {

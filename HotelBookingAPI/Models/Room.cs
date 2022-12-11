@@ -8,12 +8,12 @@ namespace hotelBooking.Models
     public class Room
     {
         [BsonId]
+        [BsonElement("roomID")]
+        [JsonPropertyName("roomID")]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? ID { get; set; }
-        /*[BsonElement("hotel")]
-        [JsonPropertyName("hotel")]
-        public Hotel? Hotel { get; set; }*/ // dont know if its worth to keep the hotel object here
+        public string? RoomID { get; set; }
         [BsonElement("hotelID")]
+        [JsonPropertyName("hotelID")]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? HotelID { get; set; }
         [BsonElement("roomNumber")]
@@ -30,7 +30,7 @@ namespace hotelBooking.Models
         public List<RoomPriceRange> PriceRanges { get; set; } = new List<RoomPriceRange>();
         [BsonElement("bookedDates")]
         [JsonPropertyName("bookedDates")]
-        public List<BookedRoomInfo> BookedDates { get; set; } = new List<BookedRoomInfo>(); //is this not supposed to be RoomBookingInfo?
+        public List<BookedRoomInfo> BookedDates { get; set; } = new List<BookedRoomInfo>();
         [BsonElement("extraAtributes")]
         [JsonPropertyName("extraAtributes")]
         public ExtraAtributes? ExtraAtributes { get; set; }
