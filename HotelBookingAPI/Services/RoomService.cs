@@ -17,7 +17,7 @@ namespace HotelBookingAPI.Services
         }
         public async Task<List<Room>> GetAllRooms(int? limit)
         {
-            if (limit is null)
+            if (limit == 0)
             {
                 return await _roomCollection.Find(_ => true).ToListAsync();
             }
@@ -153,7 +153,10 @@ namespace HotelBookingAPI.Services
                         FromDate = intervalStart,
                         ToDate = intervalEnd
                     };
-                    availableBookingDates.Add(availableBookingDate);
+                    if (availableBookingDate.FromDate != availableBookingDate.ToDate)
+                    {
+                        availableBookingDates.Add(availableBookingDate);
+                    }
                     intervalStart = bookedDate.ToDate.Date;
                     intervalEnd = bookedDate.ToDate.Date;
             }
