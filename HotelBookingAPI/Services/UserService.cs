@@ -108,11 +108,14 @@ namespace HotelBookingAPI.Services
             await _userCollection.ReplaceOneAsync(u => u.UserID == user.UserID, user);
             return null;
         }
-        public async Task<string?> AddRoomToUser(BookedRoomInfo bookedRoomInfo)
+        public async Task<string?> AddRoomToUser(BookedRoomInfo bookedRoomInfo, bool OnlyCalculatePrice)
         {
-            FilterDefinition<User> filter = Builders<User>.Filter.Eq("UserID", bookedRoomInfo.UserID);
-            UpdateDefinition<User> update = Builders<User>.Update.AddToSet("bookedRooms", bookedRoomInfo);
-            await _userCollection.UpdateOneAsync(filter, update);
+            if (!OnlyCalculatePrice)
+            {
+                FilterDefinition<User> filter = Builders<User>.Filter.Eq("UserID", bookedRoomInfo.UserID);
+                UpdateDefinition<User> update = Builders<User>.Update.AddToSet("bookedRooms", bookedRoomInfo);
+                await _userCollection.UpdateOneAsync(filter, update);
+            }
             return null;
         }
         public async Task<string?> CancelBooking(CancellationInfo cancellationInfo)

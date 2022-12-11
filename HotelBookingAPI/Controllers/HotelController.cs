@@ -1,13 +1,9 @@
-﻿using hotelBooking.Models;
-using HotelBookingAPI.Models;
+﻿using HotelBookingAPI.Models;
 using HotelBookingAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
-using MongoDB.Driver;
-using System;
-using System.Collections;
 
 namespace HotelBookingAPI.Controllers
 {

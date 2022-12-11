@@ -163,7 +163,11 @@ namespace HotelBookingAPI.Controllers
             {
                 return NotFound($"Room with id: {id} doesn't exist.");
             }
-            await _roomService.AddPriceInterval(id, roomPriceRange);
+            var result = await _roomService.AddPriceInterval(room, roomPriceRange);
+            if (result is null)
+            {
+                return BadRequest("Price ranges overlap.");
+            }
             return NoContent();
         }
         [HttpPut("{id:length(24)}")]

@@ -12,7 +12,7 @@ namespace HotelBookingAPI.Interfaces
         Task<string?> DeleteUser(string userID);
         Task<User?> GetUserByID(string? ID);
         Task<List<User>> GetAllUsers();
-        Task<string?> AddRoomToUser(BookedRoomInfo bookingInfo);
+        Task<string?> AddRoomToUser(BookedRoomInfo bookingInfo, bool OnlyCalculatePrice = false);
         Task<string?> CancelBooking(CancellationInfo cancellationInfo);
     }
 }

@@ -54,7 +54,7 @@ namespace HotelBookingAPI.Controllers
         }
         [HttpPost("bookHotelRoom")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> BookHotelRoomByID([FromBody] RoomBookingInfo bookingInfo)
+        public async Task<IActionResult> BookHotelRoomByID([FromBody] RoomBookingInfo bookingInfo, [FromQuery] bool OnlyCalculatePrice = false)
         {
             if (ObjectId.TryParse(bookingInfo.RoomID, out _) || ObjectId.TryParse(bookingInfo.UserID, out _))
             {
@@ -77,12 +77,12 @@ namespace HotelBookingAPI.Controllers
                 {
                     return NotFound($"Room with id: {bookingInfo.RoomID} doesn't exist.");
                 }
-                var bookedRoomInfo = await _roomService.BookRoom(bookingInfo);
+                var bookedRoomInfo = await _roomService.BookRoom(bookingInfo, OnlyCalculatePrice);
                 if (bookedRoomInfo is null)
                 {
                     return BadRequest("Can't book the room with provided dates.");
                 }
-                await _userService.AddRoomToUser(bookedRoomInfo);
+                await _userService.AddRoomToUser(bookedRoomInfo, OnlyCalculatePrice);
                 return Ok(bookedRoomInfo);
             }
             return BadRequest("Invalid id provided.");

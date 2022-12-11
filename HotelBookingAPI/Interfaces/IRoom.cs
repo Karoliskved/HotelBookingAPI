@@ -13,9 +13,9 @@ namespace HotelBookingAPI.Interfaces
         Task<Room> GetRoomById(string? id);
         Task<string?> AddRoom(Room room);
         Task<Room?> UpdateRoomByID(string id, Room newRoom);
-        Task<string?> AddPriceInterval(string id, RoomPriceRange roomPriceRange);
+        Task<RoomPriceRange?> AddPriceInterval(Room room, RoomPriceRange roomPriceRange);
         Task<string?> DeleteRoomByID(string id);
-        Task<BookedRoomInfo?> BookRoom(RoomBookingInfo bookingInfo);
+        Task<BookedRoomInfo?> BookRoom(RoomBookingInfo bookingInfo, bool OnlyCalculatePrice);
         Task<List<BookedDateRange>?> ShowAvailableBookingDates(string id);
         Task<string?> CancelBooking(CancellationInfo cancellationInfo);
         Task<double?> CalculateAdditionalexpenses(string[] selectedExpenses, string id);

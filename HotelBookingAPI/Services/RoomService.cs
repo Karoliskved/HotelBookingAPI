@@ -55,9 +55,15 @@ namespace HotelBookingAPI.Services
             return null;
         }
 
-        public async Task<BookedRoomInfo?> BookRoom(RoomBookingInfo bookingInfo)
+        public async Task<BookedRoomInfo?> BookRoom(RoomBookingInfo bookingInfo, bool OnlyCalculatePrice)
         {
-            if (bookingInfo.FromDate.Date < DateTime.Today.Date)
+            //if (bookingInfo.FromDate.Date < DateTime.Today.Date)
+            //{
+            //    return null;
+            //}
+            if (bookingInfo.FromDate.Date == bookingInfo.ToDate.Date ||
+                bookingInfo.FromDate.Date < DateTime.Today.Date ||
+                bookingInfo.FromDate.Date > bookingInfo.ToDate.Date)
             {
                 return null;
             }
@@ -113,17 +119,33 @@ namespace HotelBookingAPI.Services
                 FromDate = bookingInfo.FromDate,
                 ToDate = bookingInfo.ToDate
             };
-            FilterDefinition<Room> filter = Builders<Room>.Filter.Eq("RoomID", bookingInfo.RoomID);
-            UpdateDefinition<Room> update = Builders<Room>.Update.AddToSet("bookedDates", bookedRoomInfo);
-            await _roomCollection.UpdateOneAsync(filter, update);
+            if (!OnlyCalculatePrice)
+            {
+                FilterDefinition<Room> filter = Builders<Room>.Filter.Eq("RoomID", bookingInfo.RoomID);
+                UpdateDefinition<Room> update = Builders<Room>.Update.AddToSet("bookedDates", bookedRoomInfo);
+                await _roomCollection.UpdateOneAsync(filter, update);
+            }
             return bookedRoomInfo;
         }
-        public async Task<string?> AddPriceInterval(string id, RoomPriceRange roomPriceRange)
+        public async Task<RoomPriceRange?> AddPriceInterval(Room room, RoomPriceRange roomPriceRange)
         {
-            FilterDefinition<Room> filter = Builders<Room>.Filter.Eq("RoomID", id);
+            if (roomPriceRange.FromDate.Date == roomPriceRange.ToDate.Date ||
+                roomPriceRange.FromDate.Date < DateTime.Today.Date||
+                roomPriceRange.FromDate.Date > roomPriceRange.ToDate.Date)
+            {
+                return null;
+            }
+            foreach (var priceRange in room.PriceRanges)
+            {
+                if (!(roomPriceRange.FromDate.Date >= priceRange.ToDate.Date || roomPriceRange.ToDate.Date <= priceRange.FromDate.Date))
+                {
+                    return null;
+                }
+            }
+            FilterDefinition<Room> filter = Builders<Room>.Filter.Eq("RoomID", room.RoomID);
             UpdateDefinition<Room> update = Builders<Room>.Update.AddToSet("priceRanges", roomPriceRange);
             await _roomCollection.UpdateOneAsync(filter, update);
-            return null;
+            return roomPriceRange;
         }
         public async Task<List<BookedDateRange>?> ShowAvailableBookingDates(string id)
         {
