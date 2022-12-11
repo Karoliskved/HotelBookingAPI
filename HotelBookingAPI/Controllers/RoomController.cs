@@ -12,15 +12,15 @@ namespace HotelBookingAPI.Controllers
     [ApiController]
     public class RoomController : ControllerBase
     {
-        
+
         public readonly RoomService _roomService;
         public RoomController(RoomService roomService)
         {
             _roomService = roomService;
         }
-        [HttpGet]
+        [HttpGet("getAllRooms/{limit}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAllRooms([FromBody] int? limit)
+        public async Task<IActionResult> GetAllRooms(int limit)
         {
             var rooms = await _roomService.GetAllRooms(limit);
             if (rooms is not null)
@@ -121,7 +121,7 @@ namespace HotelBookingAPI.Controllers
             return NotFound($"No rooms");
         }
   
-    [HttpGet("{id}")]
+        [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetRoomById(string id)
         {
