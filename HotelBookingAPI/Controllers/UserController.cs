@@ -167,7 +167,34 @@ namespace HotelBookingAPI.Controllers
             }
             return BadRequest($"Invalid id: {id} provided.");
         }
-        [HttpPost("/{id}/CalculateExtras")]
+        [HttpDelete("cancelBooking")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> CancelBooking([FromBody] CancellationInfo cacellationInfo)
+        {
+            if (ObjectId.TryParse(cacellationInfo.RoomID, out _) ||
+                ObjectId.TryParse(cacellationInfo.UserID, out _))
+            {
+                string? username = _context.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value;
+                if (username is null)
+                {
+                    return Unauthorized();
+                }
+                var user = await _userService.GetUserByID(cacellationInfo.UserID);
+                if (user is null)
+                {
+                    return NotFound("User doesn't exist.");
+                }
+                if (user.Username != username)
+                {
+                    return Unauthorized();
+                }
+                await _userService.CancelBooking(cacellationInfo);
+                await _roomService.CancelBooking(cacellationInfo);
+                return NoContent();
+            }
+            return BadRequest("Invalid object id provided.");
+        }
+        [HttpPost("{id}/CalculateExtras")]
         [AllowAnonymous]
         public async Task<IActionResult> CalculateExtraCosts(string id, [FromBody] string[] additionalExpenses)
         {

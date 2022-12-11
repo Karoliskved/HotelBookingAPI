@@ -171,6 +171,13 @@ namespace HotelBookingAPI.Services
             return null;
 
         }
+        public async Task<string?> CancelBooking(CancellationInfo cancellationInfo)
+        {
+            var filter = Builders<Room>.Filter.Eq("RoomID", cancellationInfo.RoomID);
+            var update = Builders<Room>.Update.PullFilter(x => x.BookedDates, y => y.UserID == cancellationInfo.UserID);
+            await _roomCollection.UpdateOneAsync(filter, update);
+            return null;
+        }
         public async Task<List<Room>> SortRooms(string[] atributes, string[] operators)
         {
             var bldr = Builders<Room>.Sort;
