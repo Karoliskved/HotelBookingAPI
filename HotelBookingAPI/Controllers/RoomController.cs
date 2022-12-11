@@ -28,8 +28,100 @@ namespace HotelBookingAPI.Controllers
                 return Ok(rooms);
             }
             return NotFound("There are no rooms in the database.");
+
         }
-        [HttpGet("{id}")]
+        [HttpGet("/byHotel/{hotelID}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllRoomsByHotel(string hotelID)
+        {
+            
+            if (ObjectId.TryParse(hotelID, out _))
+            {
+                var rooms = await _roomService.GetRoomsByHotel(hotelID);
+                if (rooms is not null)
+                {
+                    return Ok(rooms);
+                }
+                return NotFound($"Room with id: {hotelID} doesn't exist.");
+            }
+            return BadRequest($"Invalid id: {hotelID} provided.");
+        }
+        [HttpPost("multi/sort")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SortHRooms([FromBody] FilterSort input)
+
+        {
+            string[]? atributes = input.Atributes;
+
+            string[]? operators = input.Operators;
+            var rooms = await _roomService.SortRooms(atributes, operators);
+            if (rooms is not null)
+            {
+                return Ok(rooms);
+            }
+            return NotFound($"No rooms");
+        }
+        [HttpPost("multi/filter")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetRoomByMultiParam([FromBody] FilterInput input)
+        {
+            /*string[] atributes = { "geographicData.distToBeach", "geographicData.distToMountains" };
+            double[] distances = { 26, 21 };*/
+            /*
+                     {
+     "atributes": [
+    "geographicData.distToBeach", "geographicData.distToCity"
+  ],
+  "distances": [
+    26, 20
+  ],
+  "operators": [
+    "Lt", "Gt"
+  ]
+
+     ***************
+      "atributes": [
+    "geographicData.distToBeach", "geographicData.distToBeach"
+  ],
+  "distances": [
+    30, 10
+  ],
+  "operators": [
+    "Lt", "Gt"
+  ]
+}*/
+            string[]? atributes = input.Atributes;
+            string[]? types = input.Types;
+            Object[] ArrayOfObjects = new object[atributes.Length];
+            var distances = input.Distances;
+            for (int i = 0; i < atributes.Length; i++)
+            {
+                switch (types[i])
+                {
+                    case "double":
+                        double inputVarInt = double.Parse(distances[i]);
+                        ArrayOfObjects[i] = inputVarInt;
+                        break;
+                    case "string":
+                        ArrayOfObjects[i] = distances[i];
+                        break;
+                    case "bool":
+                        bool inputVarBool = bool.Parse(distances[i]);
+                        ArrayOfObjects[i] = inputVarBool;
+                        break;
+
+                }
+            }
+            string[]? operators = input.Operators;
+            var rooms = await _roomService.GetRoomsByMultiParam(atributes, ArrayOfObjects, operators);
+            if (rooms is not null)
+            {
+                return Ok(rooms);
+            }
+            return NotFound($"No rooms");
+        }
+  
+    [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetRoomById(string id)
         {
@@ -93,5 +185,6 @@ namespace HotelBookingAPI.Controllers
             await _roomService.DeleteRoomByID(id);
             return NoContent();
         }
+
     }
 }

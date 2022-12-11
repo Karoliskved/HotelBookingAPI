@@ -2,6 +2,7 @@
 using HotelBookingAPI.Interfaces;
 using HotelBookingAPI.Models;
 using MongoDB.Driver;
+using System.Collections;
 
 namespace HotelBookingAPI.Services
 {
@@ -25,6 +26,10 @@ namespace HotelBookingAPI.Services
         public async Task<Room> GetRoomById(string? id)
         {
             return await _roomCollection.Find(room => room.RoomID == id).FirstOrDefaultAsync();
+        }
+        public async Task<List<Room>> GetRoomsByHotel(string? hotelID)
+        {
+            return await _roomCollection.Find(room => room.HotelID == hotelID).ToListAsync();
         }
 
         public async Task<string?> AddRoom(Room room)
@@ -166,12 +171,81 @@ namespace HotelBookingAPI.Services
             return null;
 
         }
-        public async Task<string?> CancelBooking(CancellationInfo cancellationInfo)
+        public async Task<List<Room>> SortRooms(string[] atributes, string[] operators)
         {
-            var filter = Builders<Room>.Filter.Eq("RoomID", cancellationInfo.RoomID);
-            var update = Builders<Room>.Update.PullFilter(x => x.BookedDates, y => y.UserID == cancellationInfo.UserID);
-            await _roomCollection.UpdateOneAsync(filter, update);
-            return null;
+            var bldr = Builders<Room>.Sort;
+            int i = 0;
+            var sortDefinitions = atributes.Select(x =>
+            {
+
+                SortDefinition<Room> sortDef;
+                if (operators[i] == "1")
+                {
+                    sortDef = bldr.Descending(x);
+                }
+                else if (operators[i] == "0")
+                {
+                    sortDef = bldr.Ascending(x);
+                }
+                else
+                {
+                    sortDef = null;
+                }
+                i++;
+                return sortDef;
+            });
+            /* for (int i = 0; i < atributes.Length; i++)
+             {
+                 sortString += atributes[i] + ": " + operators[i];
+                 if (i != atributes.Length - 1)
+                 {
+                     sortString += ", ";
+                 }
+             }
+             sortString += "}";*/
+            var sortDef = bldr.Combine(sortDefinitions);
+
+            return await _roomCollection.Find(_ => true).Limit(100).Sort(sortDef).ToListAsync();
+        }
+        public async Task<List<Room>> GetRoomsByMultiParam(string[] atributes, Object[] distances, string[] operators)
+        {
+            var builder = Builders<Room>.Filter;
+            var filter = builder.Empty;
+            for (int i = 0; i < atributes.Length; i++)
+            {
+                switch (operators[i])
+                {
+                    case "Lt":
+                        filter = filter & builder.Lt(atributes[i], distances[i]);
+                        break;
+                    case "Gt":
+                        filter = filter & builder.Gt(atributes[i], distances[i]);
+                        break;
+                    case "Eq":
+                        filter = filter & builder.Eq(atributes[i], distances[i]);
+                        break;
+                }
+
+
+
+                // _tempHotelcollection= _tempHotelcollection.Find(hotel =>  hotel.GeographicData.GetType().GetProperty("DistToShop").GetValue(hotel.GeographicData, null) == distances[i]).FirstOrDefaultAsync();
+            }
+            return await _roomCollection.Find(filter).ToListAsync();
+        }
+        public static object GetPropValue(object src, string propName)
+        {
+            return src.GetType().GetProperty(propName).GetValue(src, null);
+        }
+        public async Task<double?> CalculateAdditionalexpenses(string[] selectedExpenses, string id) {
+            var room = await GetRoomById(id);
+            double finalExpense = 0;
+            foreach (var expense in selectedExpenses)
+            {
+
+                finalExpense+=(Double)GetPropValue(room.AditionalPurchases, expense);
+            }  
+            return finalExpense;
         }
     }
 }
+

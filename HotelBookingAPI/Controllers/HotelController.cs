@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
+using System.Collections;
 
 namespace HotelBookingAPI.Controllers
 {
@@ -111,20 +112,46 @@ namespace HotelBookingAPI.Controllers
   ]
 
      ***************
+{
       "atributes": [
-    "geographicData.distToBeach", "geographicData.distToBeach"
+    "capacity", "extraAtributes.wifi"
   ],
   "distances": [
-    30, 10
+    "1", "true"
   ],
+"types": [ 
+"double", "bool"
+],
   "operators": [
-    "Lt", "Gt"
+    "Gt", "Eq"
   ]
+}
 }*/
             string[]? atributes = input.Atributes;
-            double[]? distances = input.Distances;
+            string[]? types = input.Types;
+            Object[] ArrayOfObjects = new object[atributes.Length];
+            var distances = input.Distances;
+            for (int i = 0; i < atributes.Length; i++)
+            {
+                switch (types[i])
+                {
+                    case "double":
+                        double inputVarInt = double.Parse(distances[i]);
+                        ArrayOfObjects[i] = inputVarInt;
+                        break;
+                    case "string":
+                        ArrayOfObjects[i] = distances[i];
+                        break;
+                    case "bool":
+                        bool inputVarBool = bool.Parse(distances[i]);
+                        ArrayOfObjects[i] = inputVarBool;
+                        break;
+
+                }
+            }
             string[]? operators = input.Operators;
-            var hotel = await _hotelService.GetHotelByMultiParam(atributes, distances, operators);
+            var hotel = await _hotelService.GetHotelByMultiParam(atributes, ArrayOfObjects, operators);
+           
             if (hotel is not null)
             {
                 return Ok(hotel);

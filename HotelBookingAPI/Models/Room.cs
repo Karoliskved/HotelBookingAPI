@@ -34,6 +34,9 @@ namespace hotelBooking.Models
         [BsonElement("extraAtributes")]
         [JsonPropertyName("extraAtributes")]
         public ExtraAtributes? ExtraAtributes { get; set; }
+        [BsonElement("aditionalPurchases")]
+        [JsonPropertyName("aditionalPurchases")]
+        public AditionalPurchases? AditionalPurchases { get; set; }
         [BsonElement("description")]
         [JsonPropertyName("description")]
         public string? Description { get; set; }
